@@ -20,7 +20,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoAoo', (err, client) => {
             .find()
             .toArray().then((res) => {
             console.log(JSON.stringify(res, undefined, 2))
-        })
+    })
 
 
         // client.close();

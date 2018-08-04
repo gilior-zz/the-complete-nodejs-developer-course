@@ -1,6 +1,5 @@
-
-const {MongoClient,ObjectID} = require('mongodb');
-var obj=new ObjectID();
+const {MongoClient, ObjectID} = require('mongodb');
+var obj = new ObjectID();
 console.log(obj)
 
 MongoClient.connect('mongodb://localhost:27017/TodoAoo', (err, client) => {
