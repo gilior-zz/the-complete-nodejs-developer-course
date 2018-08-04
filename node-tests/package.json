@@ -1,0 +1,20 @@
+{
+  "name": "node-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha **/app.test.js",
+    "t": "nodemon --exec npm test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "expect": "^1.20.2",
+    "express": "^4.16.3",
+    "mocha": "^5.2.0",
+    "rewire": "^4.0.1",
+    "supertest": "^3.1.0"
+  }
+}
