@@ -1,31 +1,27 @@
-const mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/ToDoApp');
+var express = require('express')
+var bodyParser = require('body-parser')
 
+var {mongoose} = require('./db/mongoose')
+var {ToDo} = require('./model/todo')
+var {User} = require('./model/user')
 
-var ToDo = mongoose.model('ToDo', {
-    text: {type: String, required: true, minLength: 1, trim: true},
-    completed: {type: Boolean, default: false},
-    completedAt: {type: Number, default: null},
-});
+var app = express();
 
-var User = mongoose.model('User', {
-    email: {type: String, required: true, minLength: 1, trim: true}
-});
+app.use(bodyParser.json());
 
-var newToDo = new ToDo(
-    {text: 4}
-)
-
+/*
+examples
+----------------------
+var newToDo = new ToDo(    {text: 4})
 var newUsr = new User({email: '1'})
 
-// newToDo.save()
-//     .then((doc) => {
-//             console.log('saved todo', doc)
-//         }, (err) => {
-//             console.log('unable 2 save todo', err)
-//         }
-//     )
+newToDo.save()
+    .then((doc) => {
+            console.log('saved todo', doc)
+        }, (err) => {
+            console.log('unable 2 save todo', err)
+        }
+    )
 
 newUsr.save()
     .then((doc) => {
@@ -33,4 +29,18 @@ newUsr.save()
     }, (err) => {
         console.log('error on save user', err)
     })
+*/
+
+app.post('/todos', (req, res) => {
+    var todo = new ToDo({text: req.body.text});
+    todo.save().then((doc) => {
+        res.send(doc)
+    }, (err) => {
+        res.status(400).send(err)
+    })
+})
+
+app.listen(3000, () => {
+    console.log('listening on port 3000')
+})
 
