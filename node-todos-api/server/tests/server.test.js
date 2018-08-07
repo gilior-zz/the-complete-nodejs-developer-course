@@ -5,8 +5,18 @@ const {app} = require('../server')
 const {ToDo} = require('../model/todo')
 const user = require('../model/user')
 
+
+const todos = [
+    {text: '1st task'},
+    {text: '2nd task'},
+]
 beforeEach((done) => {
-    ToDo.remove({}).then(() => done())
+    ToDo.remove({}).then(() => {
+        return ToDo.insertMany(todos)
+            .then(() => done())
+
+    })
+
 })
 
 describe(('post /todos'), () => {
@@ -21,7 +31,7 @@ describe(('post /todos'), () => {
             })
             .end((err, res) => {
                 if (err) return done(err)
-                ToDo.find()
+                ToDo.find({text})
                     .then((todos) => {
                         expect(todos.length).toBe(1);
                         expect(todos[0].text).toBe(text);
@@ -32,7 +42,7 @@ describe(('post /todos'), () => {
             })
     });
 
-    it('shlld not create 2 do wth bad data',(done)=>{
+    it('shlld not create 2 do wth bad data', (done) => {
 
         request(app)
             .post('/todos')
@@ -42,7 +52,7 @@ describe(('post /todos'), () => {
                 if (err) return done(err)
                 ToDo.find()
                     .then((todos) => {
-                        expect(todos.length).toBe(0);
+                        expect(todos.length).toBe(2);
                         done();
                     })
                     .catch((err) => done(err)
@@ -50,6 +60,20 @@ describe(('post /todos'), () => {
             })
     })
 })
+
+describe('get /todos', () => {
+    it('shld get 2 todos', (done) => {
+        request(app)
+            .get('/todos')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todos.length).toBe(2)
+
+            })
+            .end(done)
+    })
+})
+
 
 
 
