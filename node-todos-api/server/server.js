@@ -64,24 +64,40 @@ app.get('/todos/:id', authenticate, (req, res) => {
     })
 })
 
-app.delete('/todos/:id', authenticate, (req, res) => {
+// app.delete('/todos/:id', authenticate, (req, res) => {
+//     let id = req.params.id;
+//
+//     if (!id || !ObjectID.isValid(id)) res.status(404).send({msg: 'id not valid', id})
+//
+//     // ToDo.findByIdAndRemove(id)
+//     ToDo.findOneAndRemove({_id: id, _creator: req.user._id})
+//         .then((doc) => {
+//             if (!doc) return res.status(404).send({msg: 'todo not found', id})
+//             res.status(200).send(doc)
+//         })
+//         .catch((err) => {
+//             res.status(404).send(err)
+//         })
+// })
+
+app.delete('/todos/:id', authenticate, async (req, res) => {
     let id = req.params.id;
 
     if (!id || !ObjectID.isValid(id)) res.status(404).send({msg: 'id not valid', id})
 
     // ToDo.findByIdAndRemove(id)
-    ToDo.findOneAndRemove({_id: id, _creator: req.user._id})
-        .then((doc) => {
-            if (!doc) return res.status(404).send({msg: 'todo not found', id})
-            res.status(200).send(doc)
-        })
-        .catch((err) => {
-            res.status(404).send(err)
-        })
+    try {
+        let doc = await  ToDo.findOneAndRemove({_id: id, _creator: req.user._id})
+        if (!doc) return res.status(404).send({msg: 'todo not found', id})
+        res.status(200).send(doc)
+    }
+    catch (err) {
+        res.status(404).send(err)
+    }
 })
 
 
-app.patch('/todos/:id',authenticate ,(req, res) => {
+app.patch('/todos/:id', authenticate, (req, res) => {
     var id = req.params.id;
     var body = _.pick(req.body, ['text', 'completed']);
     if (!ObjectID.isValid(id)) return res.status(404).send({msg: 'invalid id', id})
@@ -102,32 +118,59 @@ app.patch('/todos/:id',authenticate ,(req, res) => {
         .catch((err) => res.status(404).send({msg: 'update failed', err}))
 })
 
-app.post('/users', (req, res) => {
-    var body = _.pick(req.body, ['email', 'pwd'])
-    var newUsr = new User(body);
-    newUsr.save()
-        .then(() => {
-            return newUsr.generateAuthToken();
-            // if (newUser) return res.status(200).send(newUser)
-            // return res.status(500).send({msg: 'couldnt save user'}, newUser)
-        })
-        .then((token) => {
-            console.log('token', token)
-            res.header('x-auth', token).send(newUsr)
-        })
-        .catch((err) => res.status(500).send({msg: 'couldnt save user'}, err))
+// app.post('/users', (req, res) => {
+//     var body = _.pick(req.body, ['email', 'pwd'])
+//     var newUsr = new User(body);
+//     newUsr.save()
+//         .then(() => {
+//             return newUsr.generateAuthToken();
+//             // if (newUser) return res.status(200).send(newUser)
+//             // return res.status(500).send({msg: 'couldnt save user'}, newUser)
+//         })
+//         .then((token) => {
+//             console.log('token', token)
+//             res.header('x-auth', token).send(newUsr)
+//         })
+//         .catch((err) => res.status(500).send({msg: 'couldnt save user'}, err))
+// })
+
+app.post('/users', async (req, res) => {
+    try {
+        var body = _.pick(req.body, ['email', 'pwd'])
+        var newUsr = new User(body);
+        await newUsr.save();
+        let token = await newUsr.generateAuthToken();
+        console.log('token', token)
+        res.header('x-auth', token).send(newUsr)
+    }
+    catch (err) {
+        res.status(500).send({msg: 'couldnt save user'}, err)
+
+    }
 })
 
-app.post('/users/login', (req, res) => {
-    var {email, pwd} = _.pick(req.body, ['email', 'pwd'])
-    User.findByCredentials(email, pwd)
-        .then((user) => {
-            return user.generateAuthToken()
-                .then((token) => {
-                    res.header('x-auth', token).send(user);
-                })
-        })
-        .catch((err) => res.status(401).send(err));
+// app.post('/users/login', (req, res) => {
+//     var {email, pwd} = _.pick(req.body, ['email', 'pwd'])
+//     User.findByCredentials(email, pwd)
+//         .then((user) => {
+//             return user.generateAuthToken()
+//                 .then((token) => {
+//                     res.header('x-auth', token).send(user);
+//                 })
+//         })
+//         .catch((err) => res.status(401).send(err));
+// })
+app.post('/users/login', async (req, res) => {
+    try {
+        var {email, pwd} = _.pick(req.body, ['email', 'pwd'])
+        let user = await  User.findByCredentials(email, pwd);
+        let token = await user.generateAuthToken();
+        res.header('x-auth', token).send(user);
+    }
+    catch (err) {
+        res.status(401).send(err)
+    }
+
 })
 
 
@@ -141,10 +184,14 @@ app.get('/users/me', authenticate, (req, res) => {
     res.send(req.user);
 })
 
-app.delete('/users/me/token', authenticate, (req, res) => {
-    req.user.removeToken(req.token)
-        .then(() => res.send())
-        .catch((err) => res.status(500).send(err))
+app.delete('/users/me/token', authenticate, async (req, res) => {
+    try {
+        await req.user.removeToken(req.token)
+        res.send();
+    }
+    catch (err) {
+        res.status(500).send(err)
+    }
 })
 
 

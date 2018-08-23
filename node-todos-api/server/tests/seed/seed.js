@@ -1,4 +1,6 @@
 const {ObjectID} = require('mongodb');
+
+
 const {ToDo} = require('../../model/todo');
 const {User} = require('../../model/user');
 const jwt = require('jsonwebtoken')
@@ -9,14 +11,14 @@ const todos = [
     {text: '2nd task', _id: new ObjectID(), completed: true, completedAt: 33, _creator: user2ID},
 ]
 
-
+let secret = process.env.JWT_SECRET;
 var user1Obj = {
     user2ID, secret
 }
 var user2Obj = {
     user1ID, secret
 }
-var user1Token = jwt.sign(user1Obj,process.env.JWT_SECRET).toString();
+var user1Token = jwt.sign(user1Obj, process.env.JWT_SECRET).toString();
 var user2Token = jwt.sign(user2Obj, process.env.JWT_SECRET).toString();
 const users = [
     {
